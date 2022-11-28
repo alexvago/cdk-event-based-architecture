@@ -1,16 +1,19 @@
 import * as cdk from 'aws-cdk-lib';
+import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { Cognito } from './constructs/cognito';
+import { StoreSignupToDynamo } from './constructs/storeSignupDynamo';
 
 export class CepCdkHackatonStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const bus = new EventBus(this, `EventBus`, {
+      eventBusName: 'CognitoTriggersEventBus',
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'CepCdkHackatonQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new Cognito(this, 'cognito', { prefix: 'avago', eventBus: bus });
+
+    new StoreSignupToDynamo(this, 'storeSignupToDynamo', { eventBus: bus });
   }
 }
